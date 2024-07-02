@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #todo-form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        #todo-form input, #todo-form textarea {
+            margin-bottom: 10px;
+            padding: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 5px 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f1f1f1;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .todo-title {
+            font-weight: bold;
+        }
+        .todo-description {
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .todo-actions {
+            margin-top: 10px;
+        }
+        .edit-btn {
+            background-color: #008CBA;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo App</h1>
+    <form id="todo-form">
+        <input type="text" id="todo-title" placeholder="Enter todo title" required>
+        <textarea id="todo-description" placeholder="Enter todo description"></textarea>
+        <button type="submit">Add Todo</button>
+    </form>
+    <ul id="todo-list"></ul>
+
+    <script>
+        const form = document.getElementById('todo-form');
+        const titleInput = document.getElementById('todo-title');
+        const descriptionInput = document.getElementById('todo-description');
+        const todoList = document.getElementById('todo-list');
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (form.dataset.editing) {
+                updateTodo(form.dataset.editing);
+            } else {
+                addTodo();
+            }
+        });
+
+        function addTodo() {
+            const title = titleInput.value.trim();
+            const description = descriptionInput.value.trim();
+            if (title === '') return;
+
+            const todo = {
+                id: Date.now(),
+                title,
+                description
+            };
+
+            todos.push(todo);
+            saveTodos();
+            renderTodos();
+            resetForm();
+        }
+
+        function updateTodo(id) {
+            const index = todos.findIndex(todo => todo.id === parseInt(id));
+            if (index !== -1) {
+                todos[index].title = titleInput.value.trim();
+                todos[index].description = descriptionInput.value.trim();
+                saveTodos();
+                renderTodos();
+                resetForm();
+            }
+        }
+
+        function deleteTodo(id) {
+            todos = todos.filter(todo => todo.id !== id);
+            saveTodos();
+            renderTodos();
+        }
+
+        function editTodo(id) {
+            const todo = todos.find(todo => todo.id === id);
+            if (todo) {
+                titleInput.value = todo.title;
+                descriptionInput.value = todo.description;
+                form.dataset.editing = id;
+                form.querySelector('button[type="submit"]').textContent = 'Update Todo';
+            }
+        }
+
+        function resetForm() {
+            titleInput.value = '';
+            descriptionInput.value = '';
+            delete form.dataset.editing;
+            form.querySelector('button[type="submit"]').textContent = 'Add Todo';
+        }
+
+        function renderTodos() {
+            todoList.innerHTML = '';
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="todo-title">${todo.title}</div>
+                    <div class="todo-description">${todo.description}</div>
+                    <div class="todo-actions">
+                        <button class="edit-btn" data-id="${todo.id}">Edit</button>
+                        <button class="delete-btn" data-id="${todo.id}">Delete</button>
+                    </div>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        todoList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-btn')) {
+                deleteTodo(parseInt(e.target.dataset.id));
+            } else if (e.target.classList.contains('edit-btn')) {
+                editTodo(parseInt(e.target.dataset.id));
+            }
+        });
+
+        renderTodos();
+    </script>
+</body>
+</html>
