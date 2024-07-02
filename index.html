@@ -3,265 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Todo App</title>
+    <title>Todo App</title>
     <style>
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #008CBA;
-            --danger-color: #f44336;
-            --light-gray: #f1f1f1;
-            --dark-gray: #333;
-        }
-
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            line-height: 1.6;
+            margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
-            color: var(--dark-gray);
+            background-color: #f4f4f4;
         }
-
-        h1, h2 {
-            text-align: center;
-            color: var(--primary-color);
-        }
-
-        #todo-form, #category-form {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 20px;
-            background-color: white;
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
-        #todo-form input, #todo-form textarea, #todo-form select,
-        #category-form input {
-            margin-bottom: 10px;
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input, select, button {
             padding: 10px;
-            font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-
         button {
-            padding: 10px;
-            font-size: 16px;
-            background-color: var(--primary-color);
+            cursor: pointer;
+            background-color: #5cb85c;
             color: white;
             border: none;
-            cursor: pointer;
-            margin-right: 5px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
         }
-
         button:hover {
-            background-color: #45a049;
+            background-color: #4cae4c;
         }
-
-        .todo-list {
+        #todoList {
             list-style-type: none;
             padding: 0;
         }
-
         .todo-item {
-            background-color: white;
+            background: #f9f9f9;
+            padding: 10px;
             margin-bottom: 10px;
-            padding: 15px;
-            cursor: move;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-
-        .todo-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .todo-item.dragging {
-            opacity: 0.5;
-        }
-
-        .todo-title {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .todo-description {
-            margin-top: 5px;
-            font-style: italic;
-            color: #666;
-        }
-
-        .todo-category {
-            margin-top: 5px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .todo-actions {
-            margin-top: 10px;
-        }
-
-        .edit-btn {
-            background-color: var(--secondary-color);
-        }
-
-        .delete-btn {
-            background-color: var(--danger-color);
-        }
-
-        #categories {
+            border-radius: 4px;
             display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .category-btn {
-            margin: 5px;
-            padding: 5px 10px;
-            font-size: 14px;
-            background-color: #ddd;
-            border: none;
-            cursor: pointer;
-            border-radius: 20px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .category-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .priority-high {
-            border-left: 5px solid var(--danger-color);
-        }
-
-        .priority-medium {
-            border-left: 5px solid var(--secondary-color);
-        }
-
-        .priority-low {
-            border-left: 5px solid var(--primary-color);
-        }
-
-        .completed {
+        .todo-item.completed {
             opacity: 0.6;
             text-decoration: line-through;
         }
-
-        #search-bar {
+        .todo-info {
+            flex-grow: 1;
+        }
+        .todo-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .priority-high { border-left: 5px solid #d9534f; }
+        .priority-medium { border-left: 5px solid #f0ad4e; }
+        .priority-low { border-left: 5px solid #5bc0de; }
+        .category-btn {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .category-btn.active {
+            background-color: #337ab7;
+        }
+        #searchBar {
             width: 100%;
+            margin-bottom: 10px;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .tag {
+            background-color: #e9ecef;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        #statistics {
+            margin-top: 20px;
             padding: 10px;
-            margin-bottom: 20px;
-            font-size: 16px;
-            border: 1px solid #ddd;
+            background-color: #e9ecef;
             border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <h1>Todo App</h1>
-    
-    <h2>Add Category</h2>
-    <form id="category-form">
-        <input type="text" id="category-input" placeholder="Enter new category" required>
-        <button type="submit">Add Category</button>
-    </form>
-
-    <h2>Add Todo</h2>
-    <form id="todo-form">
-        <input type="text" id="todo-title" placeholder="Enter todo title" required>
-        <textarea id="todo-description" placeholder="Enter todo description"></textarea>
-        <select id="todo-category">
-            <option value="">Select category</option>
-        </select>
-        <select id="todo-priority">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-        </select>
-        <input type="date" id="todo-due-date">
-        <button type="submit">Add Todo</button>
-    </form>
-
-    <input type="text" id="search-bar" placeholder="Search todos...">
-
-    <div id="categories"></div>
-    <ul id="todo-list" class="todo-list"></ul>
+    <div class="container">
+        <h1>Todo App</h1>
+        <input type="text" id="searchBar" placeholder="Search todos...">
+        <form id="todoForm">
+            <input type="text" id="titleInput" placeholder="Title" required>
+            <input type="text" id="descriptionInput" placeholder="Description">
+            <select id="categorySelect">
+                <option value="">Select category</option>
+            </select>
+            <select id="prioritySelect">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+            <input type="date" id="dueDateInput">
+            <input type="text" id="tagsInput" placeholder="Tags (comma-separated)">
+            <button type="submit">Add Todo</button>
+        </form>
+        <div id="categories">
+            <input type="text" id="categoryInput" placeholder="New category">
+            <button onclick="addCategory()">Add Category</button>
+            <div id="categoriesDiv"></div>
+        </div>
+        <ul id="todoList"></ul>
+        <div id="statistics"></div>
+    </div>
 
     <script>
-        const todoForm = document.getElementById('todo-form');
-        const categoryForm = document.getElementById('category-form');
-        const titleInput = document.getElementById('todo-title');
-        const descriptionInput = document.getElementById('todo-description');
-        const categoryInput = document.getElementById('category-input');
-        const categorySelect = document.getElementById('todo-category');
-        const prioritySelect = document.getElementById('todo-priority');
-        const dueDateInput = document.getElementById('todo-due-date');
-        const todoList = document.getElementById('todo-list');
-        const categoriesDiv = document.getElementById('categories');
-        const searchBar = document.getElementById('search-bar');
-
         let todos = JSON.parse(localStorage.getItem('todos')) || [];
         let categories = JSON.parse(localStorage.getItem('categories')) || [];
         let currentFilter = '';
+        let currentSort = 'dueDate';
 
-        todoForm.addEventListener('submit', function(e) {
+        const todoForm = document.getElementById('todoForm');
+        const titleInput = document.getElementById('titleInput');
+        const descriptionInput = document.getElementById('descriptionInput');
+        const categorySelect = document.getElementById('categorySelect');
+        const prioritySelect = document.getElementById('prioritySelect');
+        const dueDateInput = document.getElementById('dueDateInput');
+        const tagsInput = document.getElementById('tagsInput');
+        const todoList = document.getElementById('todoList');
+        const categoriesDiv = document.getElementById('categoriesDiv');
+        const categoryInput = document.getElementById('categoryInput');
+        const searchBar = document.getElementById('searchBar');
+        const statisticsDiv = document.getElementById('statistics');
+
+        todoForm.addEventListener('submit', addTodo);
+        searchBar.addEventListener('input', renderTodos);
+
+        function addTodo(e) {
             e.preventDefault();
-            if (todoForm.dataset.editing) {
-                updateTodo(todoForm.dataset.editing);
-            } else {
-                addTodo();
-            }
-        });
-
-        categoryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            addCategory();
-        });
-
-        searchBar.addEventListener('input', function() {
-            renderTodos();
-        });
-
-        function addTodo() {
             const title = titleInput.value.trim();
             const description = descriptionInput.value.trim();
             const category = categorySelect.value;
             const priority = prioritySelect.value;
             const dueDate = dueDateInput.value;
-            if (title === '') return;
+            const tags = tagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean);
 
-            const todo = {
-                id: Date.now(),
-                title,
-                description,
-                category,
-                priority,
-                dueDate,
-                completed: false
-            };
+            if (title) {
+                const id = todoForm.dataset.editing || Date.now();
+                const index = todos.findIndex(todo => todo.id === parseInt(id));
 
-            todos.push(todo);
-            saveTodos();
-            renderTodos();
-            resetTodoForm();
-        }
+                const newTodo = {
+                    id: parseInt(id),
+                    title,
+                    description,
+                    category,
+                    priority,
+                    dueDate,
+                    tags,
+                    completed: false,
+                    createdAt: index !== -1 ? todos[index].createdAt : new Date().toISOString()
+                };
 
-        function updateTodo(id) {
-            const index = todos.findIndex(todo => todo.id === parseInt(id));
-            if (index !== -1) {
-                todos[index].title = titleInput.value.trim();
-                todos[index].description = descriptionInput.value.trim();
-                todos[index].category = categorySelect.value;
-                todos[index].priority = prioritySelect.value;
-                todos[index].dueDate = dueDateInput.value;
+                if (index !== -1) {
+                    todos[index] = newTodo;
+                } else {
+                    todos.push(newTodo);
+                }
+
                 saveTodos();
                 renderTodos();
                 resetTodoForm();
@@ -282,17 +203,14 @@
                 categorySelect.value = todo.category;
                 prioritySelect.value = todo.priority;
                 dueDateInput.value = todo.dueDate;
+                tagsInput.value = todo.tags.join(', ');
                 todoForm.dataset.editing = id;
                 todoForm.querySelector('button[type="submit"]').textContent = 'Update Todo';
             }
         }
 
         function resetTodoForm() {
-            titleInput.value = '';
-            descriptionInput.value = '';
-            categorySelect.value = '';
-            prioritySelect.value = 'low';
-            dueDateInput.value = '';
+            todoForm.reset();
             delete todoForm.dataset.editing;
             todoForm.querySelector('button[type="submit"]').textContent = 'Add Todo';
         }
@@ -346,21 +264,35 @@
             const searchTerm = searchBar.value.toLowerCase();
             filteredTodos = filteredTodos.filter(todo => 
                 todo.title.toLowerCase().includes(searchTerm) || 
-                todo.description.toLowerCase().includes(searchTerm)
+                todo.description.toLowerCase().includes(searchTerm) ||
+                todo.tags.some(tag => tag.toLowerCase().includes(searchTerm))
             );
+
+            filteredTodos.sort((a, b) => {
+                if (currentSort === 'dueDate') {
+                    return new Date(a.dueDate) - new Date(b.dueDate);
+                } else if (currentSort === 'priority') {
+                    const priorityOrder = { high: 0, medium: 1, low: 2 };
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+            });
 
             filteredTodos.forEach(todo => {
                 const li = document.createElement('li');
                 li.className = `todo-item priority-${todo.priority}`;
                 if (todo.completed) li.classList.add('completed');
-                li.draggable = true;
                 li.dataset.id = todo.id;
                 li.innerHTML = `
-                    <div class="todo-title">${todo.title}</div>
-                    <div class="todo-description">${todo.description}</div>
-                    <div class="todo-category">${todo.category}</div>
-                    <div class="todo-priority">Priority: ${todo.priority}</div>
-                    <div class="todo-due-date">Due: ${todo.dueDate || 'Not set'}</div>
+                    <div class="todo-info">
+                        <h3>${todo.title}</h3>
+                        <p>${todo.description}</p>
+                        <div>Category: ${todo.category || 'None'}</div>
+                        <div>Priority: ${todo.priority}</div>
+                        <div>Due: ${todo.dueDate || 'Not set'}</div>
+                        <div class="tags">
+                            ${todo.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    </div>
                     <div class="todo-actions">
                         <button class="edit-btn" data-id="${todo.id}">Edit</button>
                         <button class="delete-btn" data-id="${todo.id}">Delete</button>
@@ -370,50 +302,20 @@
                 todoList.appendChild(li);
             });
 
-            setupDragAndDrop();
+            updateStatistics();
         }
 
-        function setupDragAndDrop() {
-            const draggables = document.querySelectorAll('.todo-item');
-            draggables.forEach(draggable => {
-                draggable.addEventListener('dragstart', () => {
-                    draggable.classList.add('dragging');
-                });
-                draggable.addEventListener('dragend', () => {
-                    draggable.classList.remove('dragging');
-                    updateTodosOrder();
-                });
-            });
+        function updateStatistics() {
+            const total = todos.length;
+            const completed = todos.filter(todo => todo.completed).length;
+            const overdue = todos.filter(todo => !todo.completed && new Date(todo.dueDate) < new Date()).length;
 
-            todoList.addEventListener('dragover', e => {
-                e.preventDefault();
-                const afterElement = getDragAfterElement(todoList, e.clientY);
-                const draggable = document.querySelector('.dragging');
-                if (afterElement == null) {
-                    todoList.appendChild(draggable);
-                } else {
-                    todoList.insertBefore(draggable, afterElement);
-                }
-            });
-        }
-
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.todo-item:not(.dragging)')];
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        function updateTodosOrder() {
-            const newOrder = Array.from(todoList.children).map(item => parseInt(item.dataset.id));
-            todos = newOrder.map(id => todos.find(todo => todo.id === id)).filter(Boolean);
-            saveTodos();
+            statisticsDiv.innerHTML = `
+                <h3>Statistics</h3>
+                <p>Total todos: ${total}</p>
+                <p>Completed: ${completed}</p>
+                <p>Overdue: ${overdue}</p>
+            `;
         }
 
         function saveTodos() {
@@ -442,6 +344,11 @@
                 toggleComplete(parseInt(e.target.dataset.id));
             }
         });
+
+        function changeSortOrder(sort) {
+            currentSort = sort;
+            renderTodos();
+        }
 
         renderCategories();
         renderTodos();
