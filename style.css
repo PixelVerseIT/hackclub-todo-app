@@ -1,0 +1,234 @@
+:root {
+    --bg-color: #f4f4f4;
+    --text-color: #333;
+    --card-bg: #fff;
+    --header-bg: #4a90e2;
+    --button-bg: #5cb85c;
+    --button-hover: #4cae4c;
+    --delete-button: #d9534f;
+    --delete-button-hover: #c9302c;
+}
+
+.dark-mode {
+    --bg-color: #333;
+    --text-color: #f4f4f4;
+    --card-bg: #444;
+    --header-bg: #2c3e50;
+    --button-bg: #3fa76a;
+    --button-hover: #27ae60;
+    --delete-button: #e74c3c;
+    --delete-button-hover: #c0392b;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input, select, button {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+body.dark-mode input, body.dark-mode select{
+    background: #343434;
+    color: #e0e0e0;
+    outline: none;
+    border: 1px solid #555;
+}
+
+button {
+    cursor: pointer;
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: var(--button-hover);
+}
+
+#todoList {
+    list-style-type: none;
+    padding: 0;
+}
+
+.todo-item {
+    background: var(--card-bg);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.todo-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.todo-item.completed {
+    opacity: 0.6;
+}
+
+.todo-info {
+    flex-grow: 1;
+}
+
+.todo-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.priority-high { border-left: 5px solid #d9534f; }
+.priority-medium { border-left: 5px solid #f0ad4e; }
+.priority-low { border-left: 5px solid #5bc0de; }
+
+.category-btn {
+    margin-right: 5px;
+    margin-bottom: 5px;
+    background-color: #e9ecef;
+    color: var(--text-color);
+}
+
+#categoriesDiv{
+    margin-top: 10px;
+}
+
+body.dark-mode .category-btn {
+    background: #666666;
+    color: #e0e0e0;
+}
+
+body.dark-mode .category-btn.active {
+    background: #0056b3;
+}
+
+.category-btn.active {
+    background-color: var(--header-bg);
+    color: white;
+}
+
+#searchBar {
+    width: 90%;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.tag {
+    background-color: #e9ecef;
+    color: var(--text-color);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.8em;
+}
+
+body.dark-mode .tag {
+    background: #666666;
+    color: #e0e0e0;
+}
+
+#statistics {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.edit-btn, .delete-btn, .complete-btn {
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+
+.delete-btn {
+    background-color: var(--delete-button);
+}
+
+.delete-btn:hover {
+    background-color: var(--delete-button-hover);
+}
+
+#darkModeToggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--header-bg);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#darkModeToggle:hover {
+    background-color: var(--button-hover);
+}
+
+#undoContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--header-bg);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: none;
+}
+
+#undoButton {
+    margin-left: 10px;
+    background-color: white;
+    color: var(--header-bg);
+}
+
+.chart-container {
+    margin-top: 20px;
+    height: 300px;
+}
+
+.mini-header{
+    margin-bottom: 5px;
+    margin-top: 0px;
+}

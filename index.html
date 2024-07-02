@@ -3,220 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Todo App</title>
+    <title>Todo App | Hayden Kong</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f4f4f4;
-            --text-color: #333;
-            --card-bg: #fff;
-            --header-bg: #4a90e2;
-            --button-bg: #5cb85c;
-            --button-hover: #4cae4c;
-            --delete-button: #d9534f;
-            --delete-button-hover: #c9302c;
-        }
-
-        .dark-mode {
-            --bg-color: #333;
-            --text-color: #f4f4f4;
-            --card-bg: #444;
-            --header-bg: #2c3e50;
-            --button-bg: #2ecc71;
-            --button-hover: #27ae60;
-            --delete-button: #e74c3c;
-            --delete-button-hover: #c0392b;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--text-color);
-            margin-bottom: 30px;
-        }
-
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        input, select, button {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        button {
-            cursor: pointer;
-            background-color: var(--button-bg);
-            color: white;
-            border: none;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: var(--button-hover);
-        }
-
-        #todoList {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .todo-item {
-            background: var(--card-bg);
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .todo-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .todo-item.completed {
-            opacity: 0.6;
-        }
-
-        .todo-info {
-            flex-grow: 1;
-        }
-
-        .todo-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .priority-high { border-left: 5px solid #d9534f; }
-        .priority-medium { border-left: 5px solid #f0ad4e; }
-        .priority-low { border-left: 5px solid #5bc0de; }
-
-        .category-btn {
-            margin-right: 5px;
-            margin-bottom: 5px;
-            background-color: #e9ecef;
-            color: var(--text-color);
-        }
-
-        .category-btn.active {
-            background-color: var(--header-bg);
-            color: white;
-        }
-
-        #searchBar {
-            width: 100%;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
-        }
-
-        .tag {
-            background-color: #e9ecef;
-            color: var(--text-color);
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.8em;
-        }
-
-        #statistics {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .edit-btn, .delete-btn, .complete-btn {
-            padding: 5px 10px;
-            font-size: 0.9em;
-        }
-
-        .delete-btn {
-            background-color: var(--delete-button);
-        }
-
-        .delete-btn:hover {
-            background-color: var(--delete-button-hover);
-        }
-
-        #darkModeToggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--header-bg);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #darkModeToggle:hover {
-            background-color: var(--button-hover);
-        }
-
-        #undoContainer {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--header-bg);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            display: none;
-        }
-
-        #undoButton {
-            margin-left: 10px;
-            background-color: white;
-            color: var(--header-bg);
-        }
-
-        .chart-container {
-            margin-top: 20px;
-            height: 300px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
     <div class="container">
-        <h1>Enhanced Todo App</h1>
+        <h1>Todo App</h1>
+        <p style="text-align: center; margin-top: 0px; margin-bottom: 25px;">By Hayden Kong</p>
         <input type="text" id="searchBar" placeholder="Search todos...">
+        <p class="mini-header">Add todo:</p>
         <form id="todoForm">
             <input type="text" id="titleInput" placeholder="Title" required>
             <input type="text" id="descriptionInput" placeholder="Description">
@@ -250,10 +47,11 @@
         <button id="importButton">Import Todos</button>
     </div>
     <div id="undoContainer">
-        Last todo deleted. <button id="undoButton">Undo</button>
+        A todo has been deleted. <button id="undoButton">Undo</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/date-fns.min.js"></script>
+    <!-- date-fns does not work! -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/cdn.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
@@ -468,9 +266,17 @@
             updateStatistics();
         }
 
+        // Using date-fns library - does not work
+        // function formatDate(dateString) {
+        //     return date_fns.format(new Date(dateString), 'MMM d, yyyy');
+        // }
+
         function formatDate(dateString) {
-            return date_fns.format(new Date(dateString), 'MMM d, yyyy');
+            const date = new Date(dateString);
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            return date.toLocaleDateString(undefined, options);
         }
+
 
         function updateStatistics() {
             const total = todos.length;
