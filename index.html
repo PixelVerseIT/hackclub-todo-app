@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Todo App</title>
+    <title>Advanced Todo App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
         }
-        #todo-form {
+        #todo-form, #category-form {
             display: flex;
             flex-direction: column;
             margin-bottom: 20px;
         }
-        #todo-form input, #todo-form textarea {
+        #todo-form input, #todo-form textarea, #todo-form select,
+        #category-form input {
             margin-bottom: 10px;
             padding: 5px;
             font-size: 16px;
@@ -33,14 +34,18 @@
             cursor: pointer;
             margin-right: 5px;
         }
-        ul {
+        .todo-list {
             list-style-type: none;
             padding: 0;
         }
-        li {
+        .todo-item {
             background-color: #f1f1f1;
             margin-bottom: 10px;
             padding: 10px;
+            cursor: move;
+        }
+        .todo-item.dragging {
+            opacity: 0.5;
         }
         .todo-title {
             font-weight: bold;
@@ -48,6 +53,11 @@
         .todo-description {
             margin-top: 5px;
             font-style: italic;
+        }
+        .todo-category {
+            margin-top: 5px;
+            font-weight: bold;
+            color: #4CAF50;
         }
         .todo-actions {
             margin-top: 10px;
@@ -58,48 +68,98 @@
         .delete-btn {
             background-color: #f44336;
         }
+        #categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .category-btn {
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+        }
+        .category-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <h1>Todo App</h1>
+    
+    <h2>Add Category</h2>
+    <form id="category-form">
+        <input type="text" id="category-input" placeholder="Enter new category" required>
+        <button type="submit">Add Category</button>
+    </form>
+
+    <h2>Add Todo</h2>
     <form id="todo-form">
         <input type="text" id="todo-title" placeholder="Enter todo title" required>
         <textarea id="todo-description" placeholder="Enter todo description"></textarea>
+        <select id="todo-category">
+            <option value="">Select category</option>
+        </select>
         <button type="submit">Add Todo</button>
     </form>
-    <ul id="todo-list"></ul>
+
+    <div id="categories"></div>
+    <ul id="todo-list" class="todo-list"></ul>
 
     <script>
-        const form = document.getElementById('todo-form');
+        const todoForm = document.getElementById('todo-form');
+        const categoryForm = document.getElementById('category-form');
         const titleInput = document.getElementById('todo-title');
         const descriptionInput = document.getElementById('todo-description');
+        const categoryInput = document.getElementById('category-input');
+        const categorySelect = document.getElementById('todo-category');
         const todoList = document.getElementById('todo-list');
-        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        const categoriesDiv = document.getElementById('categories');
 
-        form.addEventListener('submit', function(e) {
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        let categories = JSON.parse(localStorage.getItem('categories')) || [];
+        let currentFilter = '';
+
+        todoForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (form.dataset.editing) {
-                updateTodo(form.dataset.editing);
+            if (todoForm.dataset.editing) {
+                updateTodo(todoForm.dataset.editing);
             } else {
                 addTodo();
             }
         });
 
+        categoryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            addCategory();
+        });
+
         function addTodo() {
             const title = titleInput.value.trim();
             const description = descriptionInput.value.trim();
+            const category = categorySelect.value;
             if (title === '') return;
 
             const todo = {
                 id: Date.now(),
                 title,
-                description
+                description,
+                category
             };
+
+            // Ensure todos is an array
+            if (!Array.isArray(todos)) {
+                todos = [];
+            }
 
             todos.push(todo);
             saveTodos();
             renderTodos();
-            resetForm();
+            resetTodoForm();
         }
 
         function updateTodo(id) {
@@ -107,9 +167,10 @@
             if (index !== -1) {
                 todos[index].title = titleInput.value.trim();
                 todos[index].description = descriptionInput.value.trim();
+                todos[index].category = categorySelect.value;
                 saveTodos();
                 renderTodos();
-                resetForm();
+                resetTodoForm();
             }
         }
 
@@ -124,25 +185,75 @@
             if (todo) {
                 titleInput.value = todo.title;
                 descriptionInput.value = todo.description;
-                form.dataset.editing = id;
-                form.querySelector('button[type="submit"]').textContent = 'Update Todo';
+                categorySelect.value = todo.category;
+                todoForm.dataset.editing = id;
+                todoForm.querySelector('button[type="submit"]').textContent = 'Update Todo';
             }
         }
 
-        function resetForm() {
+        function resetTodoForm() {
             titleInput.value = '';
             descriptionInput.value = '';
-            delete form.dataset.editing;
-            form.querySelector('button[type="submit"]').textContent = 'Add Todo';
+            categorySelect.value = '';
+            delete todoForm.dataset.editing;
+            todoForm.querySelector('button[type="submit"]').textContent = 'Add Todo';
+        }
+
+        function addCategory() {
+            const category = categoryInput.value.trim();
+            if (category && !categories.includes(category)) {
+                categories.push(category);
+                saveCategories();
+                renderCategories();
+                categoryInput.value = '';
+            }
+        }
+
+        function renderCategories() {
+            categoriesDiv.innerHTML = '';
+            categorySelect.innerHTML = '<option value="">Select category</option>';
+            
+            categories.forEach(category => {
+                const btn = document.createElement('button');
+                btn.textContent = category;
+                btn.classList.add('category-btn');
+                if (category === currentFilter) btn.classList.add('active');
+                btn.addEventListener('click', () => filterTodos(category));
+                categoriesDiv.appendChild(btn);
+
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+
+            const allBtn = document.createElement('button');
+            allBtn.textContent = 'All';
+            allBtn.classList.add('category-btn');
+            if (currentFilter === '') allBtn.classList.add('active');
+            allBtn.addEventListener('click', () => filterTodos(''));
+            categoriesDiv.appendChild(allBtn);
+        }
+
+        function filterTodos(category) {
+            currentFilter = category;
+            renderTodos();
+            renderCategories();
         }
 
         function renderTodos() {
             todoList.innerHTML = '';
-            todos.forEach(todo => {
+            const filteredTodos = currentFilter ? todos.filter(todo => todo.category === currentFilter) : todos;
+            
+            filteredTodos.forEach(todo => {
                 const li = document.createElement('li');
+                li.className = 'todo-item';
+                li.draggable = true;
+                li.dataset.id = todo.id;
                 li.innerHTML = `
                     <div class="todo-title">${todo.title}</div>
                     <div class="todo-description">${todo.description}</div>
+                    <div class="todo-category">${todo.category}</div>
                     <div class="todo-actions">
                         <button class="edit-btn" data-id="${todo.id}">Edit</button>
                         <button class="delete-btn" data-id="${todo.id}">Delete</button>
@@ -150,10 +261,59 @@
                 `;
                 todoList.appendChild(li);
             });
+
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const draggables = document.querySelectorAll('.todo-item');
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', () => {
+                    draggable.classList.add('dragging');
+                });
+                draggable.addEventListener('dragend', () => {
+                    draggable.classList.remove('dragging');
+                    updateTodosOrder();
+                });
+            });
+
+            todoList.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(todoList, e.clientY);
+                const draggable = document.querySelector('.dragging');
+                if (afterElement == null) {
+                    todoList.appendChild(draggable);
+                } else {
+                    todoList.insertBefore(draggable, afterElement);
+                }
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.todo-item:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function updateTodosOrder() {
+            const newOrder = Array.from(todoList.children).map(item => parseInt(item.dataset.id));
+            todos = newOrder.map(id => todos.find(todo => todo.id === id)).filter(Boolean);
+            saveTodos();
         }
 
         function saveTodos() {
             localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function saveCategories() {
+            localStorage.setItem('categories', JSON.stringify(categories));
         }
 
         todoList.addEventListener('click', function(e) {
@@ -164,6 +324,7 @@
             }
         });
 
+        renderCategories();
         renderTodos();
     </script>
 </body>
