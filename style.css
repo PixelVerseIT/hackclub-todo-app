@@ -232,3 +232,12 @@ body.dark-mode .tag {
     margin-bottom: 5px;
     margin-top: 0px;
 }
+
+/* Custom checkbox for subtasks */
+.checkmark {
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #eee;
+}

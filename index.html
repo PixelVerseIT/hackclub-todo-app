@@ -27,6 +27,11 @@
             </select>
             <input type="date" id="dueDateInput">
             <input type="text" id="tagsInput" placeholder="Tags (comma-separated)">
+            <div id="subtasksContainer">
+                <p class="mini-header">Subtasks:</p>
+                <div id="subtasksList"></div>
+                <button type="button" id="addSubtaskBtn">Add Subtask</button>
+            </div>
             <button type="submit">Add Todo</button>
         </form>
         <div id="categories">
@@ -50,8 +55,6 @@
         A todo has been deleted. <button id="undoButton">Undo</button>
     </div>
 
-    <!-- date-fns does not work! -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/cdn.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
@@ -80,6 +83,8 @@
         const exportButton = document.getElementById('exportButton');
         const importButton = document.getElementById('importButton');
         const importInput = document.getElementById('importInput');
+        const addSubtaskBtn = document.getElementById('addSubtaskBtn');
+        const subtasksList = document.getElementById('subtasksList');
 
         todoForm.addEventListener('submit', addTodo);
         searchBar.addEventListener('input', renderTodos);
@@ -88,6 +93,23 @@
         exportButton.addEventListener('click', exportTodos);
         importButton.addEventListener('click', () => importInput.click());
         importInput.addEventListener('change', importTodos);
+        addSubtaskBtn.addEventListener('click', addSubtaskInput);
+
+        function addSubtaskInput() {
+            const subtaskDiv = document.createElement('div');
+            subtaskDiv.classList.add('subtask-input');
+            subtaskDiv.innerHTML = `
+                <input type="text" class="subtask-title" placeholder="Subtask title">
+                <button type="button" class="remove-subtask-btn"><i class="fas fa-times"></i></button>
+            `;
+            subtasksList.appendChild(subtaskDiv);
+        }
+
+        subtasksList.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-subtask-btn')) {
+                e.target.closest('.subtask-input').remove();
+            }
+        });
 
         function addTodo(e) {
             e.preventDefault();
@@ -97,6 +119,9 @@
             const priority = prioritySelect.value;
             const dueDate = dueDateInput.value;
             const tags = tagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean);
+            const subtasks = Array.from(subtasksList.querySelectorAll('.subtask-title'))
+                .map(input => ({ title: input.value.trim(), completed: false }))
+                .filter(subtask => subtask.title !== '');
 
             if (title) {
                 const id = todoForm.dataset.editing || Date.now();
@@ -110,6 +135,7 @@
                     priority,
                     dueDate,
                     tags,
+                    subtasks,
                     completed: false,
                     createdAt: index !== -1 ? todos[index].createdAt : new Date().toISOString()
                 };
@@ -163,6 +189,21 @@
                 prioritySelect.value = todo.priority;
                 dueDateInput.value = todo.dueDate;
                 tagsInput.value = todo.tags.join(', ');
+                
+                // Clear existing subtasks
+                subtasksList.innerHTML = '';
+                
+                // Add existing subtasks
+                todo.subtasks.forEach(subtask => {
+                    const subtaskDiv = document.createElement('div');
+                    subtaskDiv.classList.add('subtask-input');
+                    subtaskDiv.innerHTML = `
+                        <input type="text" class="subtask-title" value="${subtask.title}" placeholder="Subtask title">
+                        <button type="button" class="remove-subtask-btn"><i class="fas fa-times"></i></button>
+                    `;
+                    subtasksList.appendChild(subtaskDiv);
+                });
+                
                 todoForm.dataset.editing = id;
                 todoForm.querySelector('button[type="submit"]').textContent = 'Update Todo';
             }
@@ -172,6 +213,7 @@
             todoForm.reset();
             delete todoForm.dataset.editing;
             todoForm.querySelector('button[type="submit"]').textContent = 'Add Todo';
+            subtasksList.innerHTML = '';
         }
 
         function addCategory() {
@@ -251,6 +293,18 @@
                         <div class="tags">
                             ${todo.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>
+                        <div class="subtasks">
+                            <h4>Subtasks:</h4>
+                            <ul>
+                                ${todo.subtasks.map((subtask, index) => `
+                                    <li>
+                                        <input type="checkbox" class="checkmark" id="subtask-${todo.id}-${index}" 
+                                            ${subtask.completed ? 'checked' : ''}>
+                                        <label for="subtask-${todo.id}-${index}">${subtask.title}</label>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
                     </div>
                     <div class="todo-actions">
                         <button class="edit-btn" data-id="${todo.id}"><i class="fas fa-edit"></i></button>
@@ -266,17 +320,11 @@
             updateStatistics();
         }
 
-        // Using date-fns library - does not work
-        // function formatDate(dateString) {
-        //     return date_fns.format(new Date(dateString), 'MMM d, yyyy');
-        // }
-
         function formatDate(dateString) {
             const date = new Date(dateString);
             const options = { month: 'short', day: 'numeric', year: 'numeric' };
             return date.toLocaleDateString(undefined, options);
         }
-
 
         function updateStatistics() {
             const total = todos.length;
@@ -343,6 +391,17 @@
                 editTodo(id);
             } else if (e.target.closest('.complete-btn')) {
                 toggleComplete(id);
+            }
+        });
+
+        todoList.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' && e.target.id.startsWith('subtask-')) {
+                const [_, todoId, subtaskIndex] = e.target.id.split('-');
+                const todo = todos.find(t => t.id === parseInt(todoId));
+                if (todo) {
+                    todo.subtasks[subtaskIndex].completed = e.target.checked;
+                    saveTodos();
+                }
             }
         });
 
