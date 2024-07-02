@@ -5,75 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Todo App</title>
     <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #008CBA;
+            --danger-color: #f44336;
+            --light-gray: #f1f1f1;
+            --dark-gray: #333;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f5f5f5;
+            color: var(--dark-gray);
         }
+
         h1, h2 {
             text-align: center;
+            color: var(--primary-color);
         }
+
         #todo-form, #category-form {
             display: flex;
             flex-direction: column;
             margin-bottom: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+
         #todo-form input, #todo-form textarea, #todo-form select,
         #category-form input {
             margin-bottom: 10px;
-            padding: 5px;
+            padding: 10px;
             font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
+
         button {
-            padding: 5px 10px;
+            padding: 10px;
             font-size: 16px;
-            background-color: #4CAF50;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             cursor: pointer;
             margin-right: 5px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
         }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
         .todo-list {
             list-style-type: none;
             padding: 0;
         }
+
         .todo-item {
-            background-color: #f1f1f1;
+            background-color: white;
             margin-bottom: 10px;
-            padding: 10px;
+            padding: 15px;
             cursor: move;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
         }
+
+        .todo-item:hover {
+            transform: translateY(-2px);
+        }
+
         .todo-item.dragging {
             opacity: 0.5;
         }
+
         .todo-title {
             font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
         }
+
         .todo-description {
             margin-top: 5px;
             font-style: italic;
+            color: #666;
         }
+
         .todo-category {
             margin-top: 5px;
             font-weight: bold;
-            color: #4CAF50;
+            color: var(--primary-color);
         }
+
         .todo-actions {
             margin-top: 10px;
         }
+
         .edit-btn {
-            background-color: #008CBA;
+            background-color: var(--secondary-color);
         }
+
         .delete-btn {
-            background-color: #f44336;
+            background-color: var(--danger-color);
         }
+
         #categories {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
+
         .category-btn {
             margin: 5px;
             padding: 5px 10px;
@@ -81,10 +129,39 @@
             background-color: #ddd;
             border: none;
             cursor: pointer;
+            border-radius: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
+
         .category-btn.active {
-            background-color: #4CAF50;
+            background-color: var(--primary-color);
             color: white;
+        }
+
+        .priority-high {
+            border-left: 5px solid var(--danger-color);
+        }
+
+        .priority-medium {
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .priority-low {
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        #search-bar {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -104,8 +181,16 @@
         <select id="todo-category">
             <option value="">Select category</option>
         </select>
+        <select id="todo-priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+        </select>
+        <input type="date" id="todo-due-date">
         <button type="submit">Add Todo</button>
     </form>
+
+    <input type="text" id="search-bar" placeholder="Search todos...">
 
     <div id="categories"></div>
     <ul id="todo-list" class="todo-list"></ul>
@@ -117,8 +202,11 @@
         const descriptionInput = document.getElementById('todo-description');
         const categoryInput = document.getElementById('category-input');
         const categorySelect = document.getElementById('todo-category');
+        const prioritySelect = document.getElementById('todo-priority');
+        const dueDateInput = document.getElementById('todo-due-date');
         const todoList = document.getElementById('todo-list');
         const categoriesDiv = document.getElementById('categories');
+        const searchBar = document.getElementById('search-bar');
 
         let todos = JSON.parse(localStorage.getItem('todos')) || [];
         let categories = JSON.parse(localStorage.getItem('categories')) || [];
@@ -138,23 +226,27 @@
             addCategory();
         });
 
+        searchBar.addEventListener('input', function() {
+            renderTodos();
+        });
+
         function addTodo() {
             const title = titleInput.value.trim();
             const description = descriptionInput.value.trim();
             const category = categorySelect.value;
+            const priority = prioritySelect.value;
+            const dueDate = dueDateInput.value;
             if (title === '') return;
 
             const todo = {
                 id: Date.now(),
                 title,
                 description,
-                category
+                category,
+                priority,
+                dueDate,
+                completed: false
             };
-
-            // Ensure todos is an array
-            if (!Array.isArray(todos)) {
-                todos = [];
-            }
 
             todos.push(todo);
             saveTodos();
@@ -168,6 +260,8 @@
                 todos[index].title = titleInput.value.trim();
                 todos[index].description = descriptionInput.value.trim();
                 todos[index].category = categorySelect.value;
+                todos[index].priority = prioritySelect.value;
+                todos[index].dueDate = dueDateInput.value;
                 saveTodos();
                 renderTodos();
                 resetTodoForm();
@@ -186,6 +280,8 @@
                 titleInput.value = todo.title;
                 descriptionInput.value = todo.description;
                 categorySelect.value = todo.category;
+                prioritySelect.value = todo.priority;
+                dueDateInput.value = todo.dueDate;
                 todoForm.dataset.editing = id;
                 todoForm.querySelector('button[type="submit"]').textContent = 'Update Todo';
             }
@@ -195,6 +291,8 @@
             titleInput.value = '';
             descriptionInput.value = '';
             categorySelect.value = '';
+            prioritySelect.value = 'low';
+            dueDateInput.value = '';
             delete todoForm.dataset.editing;
             todoForm.querySelector('button[type="submit"]').textContent = 'Add Todo';
         }
@@ -243,20 +341,30 @@
 
         function renderTodos() {
             todoList.innerHTML = '';
-            const filteredTodos = currentFilter ? todos.filter(todo => todo.category === currentFilter) : todos;
+            let filteredTodos = currentFilter ? todos.filter(todo => todo.category === currentFilter) : todos;
             
+            const searchTerm = searchBar.value.toLowerCase();
+            filteredTodos = filteredTodos.filter(todo => 
+                todo.title.toLowerCase().includes(searchTerm) || 
+                todo.description.toLowerCase().includes(searchTerm)
+            );
+
             filteredTodos.forEach(todo => {
                 const li = document.createElement('li');
-                li.className = 'todo-item';
+                li.className = `todo-item priority-${todo.priority}`;
+                if (todo.completed) li.classList.add('completed');
                 li.draggable = true;
                 li.dataset.id = todo.id;
                 li.innerHTML = `
                     <div class="todo-title">${todo.title}</div>
                     <div class="todo-description">${todo.description}</div>
                     <div class="todo-category">${todo.category}</div>
+                    <div class="todo-priority">Priority: ${todo.priority}</div>
+                    <div class="todo-due-date">Due: ${todo.dueDate || 'Not set'}</div>
                     <div class="todo-actions">
                         <button class="edit-btn" data-id="${todo.id}">Edit</button>
                         <button class="delete-btn" data-id="${todo.id}">Delete</button>
+                        <button class="complete-btn" data-id="${todo.id}">${todo.completed ? 'Undo' : 'Complete'}</button>
                     </div>
                 `;
                 todoList.appendChild(li);
@@ -316,11 +424,22 @@
             localStorage.setItem('categories', JSON.stringify(categories));
         }
 
+        function toggleComplete(id) {
+            const todo = todos.find(todo => todo.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveTodos();
+                renderTodos();
+            }
+        }
+
         todoList.addEventListener('click', function(e) {
             if (e.target.classList.contains('delete-btn')) {
                 deleteTodo(parseInt(e.target.dataset.id));
             } else if (e.target.classList.contains('edit-btn')) {
                 editTodo(parseInt(e.target.dataset.id));
+            } else if (e.target.classList.contains('complete-btn')) {
+                toggleComplete(parseInt(e.target.dataset.id));
             }
         });
 
